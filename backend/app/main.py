@@ -13,12 +13,16 @@ app = FastAPI(title="RepoMind API", version="1.0.0")
 ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:3000",
-    os.getenv("FRONTEND_URL", ""),          # set this in Railway to your Vercel URL
 ]
+
+# Support comma-separated list of frontend URLs in env var
+frontend_urls = os.getenv("FRONTEND_URL", "")
+ALLOWED_ORIGINS += [u.strip() for u in frontend_urls.split(",") if u.strip()]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[o for o in ALLOWED_ORIGINS if o],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
