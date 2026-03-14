@@ -193,6 +193,8 @@ When Uvicorn spawns worker processes (especially with `--reload`), the working d
 | `PINECONE_API_KEY` | Yes | For vector storage and search |
 | `PINECONE_INDEX_NAME` | Yes | Name of the Pinecone index (default: `repo-explainer`) |
 | `GITHUB_TOKEN` | No | Raises GitHub rate limit from 60 to 5,000 req/hour. Required for private repos. |
+| `FRONTEND_URL` | No | Comma-separated extra origins for CORS (all `*.vercel.app` domains are allowed automatically via regex) |
+| `VITE_API_URL` | No (frontend) | Full backend API URL for production (e.g. `https://xxx.up.railway.app/api`). Falls back to `/api` proxy for local dev. |
 
 ### Pinecone Index Settings
 When creating the index:
@@ -202,7 +204,30 @@ When creating the index:
 
 ---
 
-## Running the Project
+## Deployment
+
+### Backend — Railway
+1. Create a new project on [railway.app](https://railway.app) from the GitHub repo
+2. Set **Root Directory** to `backend` in service Settings
+3. Add the following environment variables in Railway:
+   - `ANTHROPIC_API_KEY`
+   - `OPENAI_API_KEY`
+   - `PINECONE_API_KEY`
+   - `PINECONE_INDEX_NAME` = `repo-explainer`
+   - `GITHUB_TOKEN` (recommended — raises rate limit from 60 to 5000 req/hr)
+   - `FRONTEND_URL` (optional — comma-separated list of allowed origins beyond `*.vercel.app`)
+4. Generate a public domain under Settings → Networking
+5. Railway uses `railway.json` to auto-configure the start command with the dynamic `$PORT`
+
+### Frontend — Vercel
+1. Import the repo on [vercel.com](https://vercel.com), set **Root Directory** to `frontend`
+2. Add environment variable:
+   - `VITE_API_URL` = `https://your-railway-url.up.railway.app/api` (must include `/api`, no trailing slash)
+3. Deploy — all `*.vercel.app` preview and production URLs are automatically allowed by the backend CORS config
+
+---
+
+## Running Locally
 
 ### Backend
 ```bash
@@ -219,6 +244,8 @@ npm install
 npm run dev
 # Runs on http://localhost:5173
 ```
+
+> For local dev, `VITE_API_URL` does not need to be set — Vite proxies `/api` to `localhost:8000` automatically.
 
 ---
 
