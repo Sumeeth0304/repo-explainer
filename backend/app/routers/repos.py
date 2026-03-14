@@ -123,18 +123,23 @@ async def _analyse_with_claude(repo_name: str, sample_files: list[dict]) -> dict
         snippet = f["content"][:1500]
         file_snippets += f"\n\n--- {f['path']} ---\n{snippet}"
 
-    prompt = f"""You are a senior software engineer. Analyse this GitHub repository called "{repo_name}".
+    prompt = f"""You are a senior software engineer explaining a codebase to a new developer joining the team.
 
-Here are key files from the repo:
+Analyse this GitHub repository called "{repo_name}" using the files below.
+
+Your PRIMARY goal is to explain what this software DOES and WHY it exists — not just what technologies it uses.
+Read the README and entry point files carefully to understand the product purpose before looking at configs.
+
+Here are key files from the repo (README and entry points first):
 {file_snippets}
 
 Return a JSON object (no markdown fences) with exactly these keys:
-- what_it_does: 2-3 sentence plain-English summary of the system's purpose
-- architecture: paragraph describing the high-level architecture (frontend/backend/DB/infra)
-- key_modules: array of strings, each describing a key module/package (format: "path/to/module — what it does")
-- api_flows: paragraph describing the main API or data flows
-- tech_stack: array of technology names detected (e.g. ["React", "FastAPI", "PostgreSQL"])
-- interesting_patterns: one paragraph noting any interesting design patterns, conventions, or notable decisions
+- what_it_does: 2-3 sentence plain-English description of the product/tool and the problem it solves. Focus on PURPOSE, not tech. A non-technical person should understand this.
+- architecture: paragraph describing how the system is structured — frontend, backend, database, external services, and how they connect
+- key_modules: array of strings describing the most important files/folders and what role they play (format: "path/to/module — what it does")
+- api_flows: paragraph describing the main user-facing flows or API endpoints — what a request looks like end to end
+- tech_stack: array of technology names (e.g. ["React", "FastAPI", "PostgreSQL", "Pinecone"])
+- interesting_patterns: one paragraph on any notable design decisions, patterns, or architectural choices worth knowing
 
 Respond with only the JSON object."""
 
@@ -203,14 +208,28 @@ async def ingest_repo(request: IngestRequest):
             batch_results = await asyncio.gather(*[fetch_and_chunk(item) for item in batch])
             results.extend([r for r in batch_results if r])
 
+        # Priority tiers for analysis sample — README and entry points first
+        priority_files = []   # README, main entry points
+        important_files = []  # routers, models, core logic
+        other_files = []      # everything else
+        config_files = []     # json, yaml, toml — last resort
+
         for path, content, chunks in results:
             all_chunks.extend(chunks)
-            is_important = any(
-                kw in path.lower()
-                for kw in ["main", "app", "index", "router", "api", "readme", "config", "schema"]
-            )
-            if is_important or len(sample_files) < 10:
-                sample_files.append({"path": path, "content": content})
+            lower = path.lower()
+            ext = _ext(path)
+            if any(kw in lower for kw in ["readme"]):
+                priority_files.append({"path": path, "content": content})
+            elif any(kw in lower for kw in ["main", "app", "index", "server", "init"]) and ext not in {".json", ".yaml", ".yml", ".toml"}:
+                priority_files.append({"path": path, "content": content})
+            elif any(kw in lower for kw in ["router", "api", "handler", "controller", "service", "model", "schema", "view"]):
+                important_files.append({"path": path, "content": content})
+            elif ext in {".json", ".yaml", ".yml", ".toml"}:
+                config_files.append({"path": path, "content": content})
+            else:
+                other_files.append({"path": path, "content": content})
+
+        sample_files = (priority_files + important_files + other_files + config_files)[:20]
 
     if not all_chunks:
         raise HTTPException(status_code=422, detail="No supported source files found in repo")
