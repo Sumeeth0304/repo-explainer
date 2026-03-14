@@ -127,7 +127,7 @@ When a user submits a repo URL that hasn't been ingested yet, the backend:
 6. **Chunks the code** — splits each file into 60-line windows with 10-line overlap so context isn't lost at boundaries. Each chunk is prefixed with `// File: path/to/file` so the AI always knows where it came from
 7. **Embeds the chunks** — sends batches of 100 chunks to OpenAI `text-embedding-3-small` with `dimensions=1024` to match the Pinecone index
 8. **Upserts into Pinecone** — stores vectors with metadata (repo_id, file_path, language, start_line, text snippet)
-9. **Analyses with Claude** — sends up to 20 prioritised sample files (entry points, configs, routers) to Claude Sonnet and asks for a structured JSON response covering: what it does, architecture, key modules, API flows, tech stack, interesting patterns
+9. **Analyses with Claude** — builds a prioritised sample of up to 20 files sent to Claude Sonnet. Files are ranked: README first, then entry points (`main`, `app`, `index`, `server`), then routers/services/models, then general files, and config/JSON files last. This ensures Claude reads the files that explain the product's *purpose* before anything else. The prompt explicitly instructs Claude to focus on what the software does and why it exists — not just the tech stack. Returns a structured JSON response: what it does, architecture, key modules, API flows, tech stack, interesting patterns.
 10. **Returns the full overview** to the frontend
 
 ### 3. Chat (`POST /api/chat`)
