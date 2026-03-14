@@ -1,6 +1,6 @@
 import type { RepoOverview, CodeChunk } from './types'
 
-const BASE = '/api'
+const BASE = import.meta.env.VITE_API_URL ?? '/api'
 
 export async function checkRepo(repoUrl: string): Promise<RepoOverview | null> {
   const res = await fetch(`${BASE}/repos/check`, {
