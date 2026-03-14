@@ -1,0 +1,133 @@
+.panel {
+  width: 320px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1rem 1rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  gap: 0.5rem;
+}
+
+.repoName {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+  word-break: break-all;
+}
+
+.stats {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
+}
+
+.badge {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  padding: 0.1rem 0.5rem;
+}
+
+.ready {
+  background: rgba(63,185,80,0.1);
+  border-color: rgba(63,185,80,0.4);
+  color: var(--green);
+}
+
+.resetBtn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0.15rem 0.3rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.resetBtn:hover { background: var(--surface2); color: var(--text); }
+
+.sections {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.section {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.sectionTitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.sectionBody {
+  padding: 0.6rem 0.75rem;
+  font-size: 0.82rem;
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.tag {
+  background: rgba(88,166,255,0.1);
+  border: 1px solid rgba(88,166,255,0.25);
+  border-radius: 4px;
+  color: var(--accent);
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  font-family: var(--mono);
+}
+
+.moduleList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.moduleItem { display: flex; flex-direction: column; gap: 0.1rem; }
+
+.modulePath {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--accent);
+  word-break: break-all;
+}
+
+.moduleDesc {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
